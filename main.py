@@ -10,7 +10,7 @@ import time
 arduino_port = '/dev/ttyUSB0'  # Puede variar; intenta con /dev/ttyUSB0 si es necesario
 baud_rate = 9600
 timeout=1
-
+### test
 arduino_serial = SerialArduino(arduino_port, baud_rate, timeout)
 
 
