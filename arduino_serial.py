@@ -8,7 +8,7 @@ class SerialArduino:
         print("Conexión establecida con Arduino")
     
     def send_msg(self, msg):
-        self.serial.write(message.encode('utf-8'))
-        time.sleep(1)
+        self.serial.write(msg)
+        
 
 

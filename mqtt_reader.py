@@ -1,7 +1,8 @@
 import paho.mqtt.client as mqtt
+import json
 
 class MQTTReader:
-    def __init__(self, broker, port=1883, topic="#", client_id=None, serial):
+    def __init__(self, broker, port=1883, topic="#", client_id=None, serial= None):
         """
         Initialize the MQTTReader.
 
@@ -36,8 +37,16 @@ class MQTTReader:
         """
         Callback when a message is received from the broker.
         """
-        self.serial.send_msg(msg)
         print(f"Received message on {msg.topic}: {msg.payload.decode('utf-8')}")
+        json_file = json.loads(msg.payload.decode('utf-8'))
+        modo = json_file["Modo"]
+        l = json_file["leftPower"]
+        r = json_file["rightPower"]
+        f = json_file["forward"]
+        msg = str(l)+","+str(r)+","+str(int(f))+"\n"
+        print(msg)
+        self.serial.send_msg(msg.encode('utf-8'))
+        
 
     def start(self):
         """
