@@ -23,7 +23,7 @@ PORT = 1883
 TOPIC = "currito"
 
 
-mqtt_reader = MQTTReader(broker=BROKER, port=PORT, topic=TOPIC, serial = arduino_serial)
+mqtt_reader = MQTTReader(broker=BROKER, port=PORT, topic=TOPIC, client_id=None, serial = arduino_serial)
 
 
 
