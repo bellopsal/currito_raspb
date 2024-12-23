@@ -3,12 +3,12 @@ import json
 from loguru import logger
 import threading
 import time  # Missing import for time module
-
+from hablar import hablar
 import modes.mode_1 as mode_1
 
 
 class MQTTReader:
-    def __init__(self, broker, port=1883, topic="#", client_id=None, serial=None):
+    def __init__(self, broker, port=1883, topic="#", client_id="test", serial=None):
         self.broker = broker
         self.port = port
         self.topic = topic
@@ -30,7 +30,9 @@ class MQTTReader:
             logger.info(f"Connected to broker at {self.broker}:{self.port}")
             self.client.subscribe(self.topic)
             logger.info(f"Subscribed to topic: {self.topic}")
+            hablar("Conexión MQTT correcta")
         else:
+            hablar("No me he logrado crear el servidor MQTT")
             logger.error(f"Failed to connect, return code {rc}")
 
     def on_message(self, client, userdata, msg):  # Corrected method signature

@@ -2,12 +2,15 @@ from mqtt_reader import MQTTReader
 from arduino_serial import SerialArduino
 import serial
 import time
+from hablar import hablar
+
+hablar("Hola soy Currita! Espera a que me configure")
 
 ##########################################################################
 ##      Serial Port
 ##########################################################################
 # Serial Settings
-arduino_port = '/dev/ttyUSB0'  # Puede variar; intenta con /dev/ttyUSB0 si es necesario
+arduino_port = '/dev/ttyACM0'  # Puede variar; intenta con /dev/ttyUSB0 si es necesario
 baud_rate = 9600
 timeout=1
 ### test
@@ -23,7 +26,7 @@ PORT = 1883
 TOPIC = "currito"
 
 
-mqtt_reader = MQTTReader(broker=BROKER, port=PORT, topic=TOPIC, client_id=None, serial = arduino_serial)
+mqtt_reader = MQTTReader(broker=BROKER, port=PORT, topic=TOPIC, serial = arduino_serial)
 
 
 

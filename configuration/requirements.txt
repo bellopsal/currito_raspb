@@ -1,0 +1,11 @@
+pyserial
+pygame
+gTTS
+pydub
+paho-mqtt
+loguru
+torch
+opencv-python
+numpy
+ultralytics
+google-generativeai

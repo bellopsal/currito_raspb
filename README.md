@@ -10,8 +10,8 @@ En primer lugar clona este repositorio en una Raspberry con el Sistema Operativo
 ## Configuración del Servidor MQTT
 Para ello solo tiene que realizar los siguientes comandos:
 ```
-chmod +x config_mqtt.sh
-./config_mqtt.sh
+chmod +x configure_mqtt.sh
+./configure_mqtt.sh
 ```
 
 para asegurarse de que el servidor está levantado puede realizar el siguiente comando asegurandose de que el resultado sea "active"

@@ -5,7 +5,9 @@ sudo apt update -y
 sudo apt upgrade -y
 
 # Install Mosquitto and Mosquitto clients
-sudo apt install -y mosquitto mosquitto-clients
+sudo apt install -y mosquitto mosquitto-clients python3-pip
+
+sudo systemctl stop mosquitto.service
 
 # Copy the mosquitto.conf file to the appropriate directory
 sudo cp mosquitto.conf /etc/mosquitto/mosquitto.conf
