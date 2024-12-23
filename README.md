@@ -11,7 +11,9 @@ En primer lugar clona este repositorio en una Raspberry con el Sistema Operativo
 
 ### Descargar el broker y cliente MQTT
 sudo apt update
+
 sudo apt upgrade
+
 sudo apt install mosquitto mosquitto-clients
 
 Una vez instalado, copie la configuración 
