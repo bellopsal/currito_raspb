@@ -7,13 +7,14 @@ En el proyecto se diseña una aplicación que se comunica con Currito para poder
 # Configuración 
 En primer lugar clona este repositorio en una Raspberry con el Sistema Operativo ya instalado.
 
-## Creación del Servidor MQTT
+## Configuración del Servidor MQTT
+Para ello solo tiene que realizar los siguientes comandos:
+```
+chmod +x config_mqtt.sh
+./ config_mqtt.sh
+```
 
-### Descargar el broker y cliente MQTT
-sudo apt update
-
-sudo apt upgrade
-
-sudo apt install mosquitto mosquitto-clients
-
-Una vez instalado, copie la configuración 
+para asegurarse de que el servidor está levantado puede realizar el siguiente comando asegurandose de que el resultado sea "active"
+```
+systemctl status mosquitto.service
+```
