@@ -6,9 +6,11 @@ import time  # Missing import for time module
 from hablar import hablar
 import modes.mode_1 as mode_1
 import modes.mode_2 as mode_2
+import cv2
 
 ##########
 detector = mode_2.ObjectDetector('yolov5su.pt')
+video_source=0
 
 
 
@@ -77,8 +79,11 @@ class MQTTReader:
 
     def fun_fact(self):
         self.some_function_active = True
+        cap = cv2.VideoCapture(video_source)
         while not self.exit_some_function:
-            detector.detect_live()
+            detector.detect_live(cap)
+        cap.release()
+        cv2.destroyAllWindows()
 
 ###### START AND STOP MQTT            
 

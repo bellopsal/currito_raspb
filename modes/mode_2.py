@@ -26,8 +26,9 @@ class ObjectDetector:
         self.model_path = model_path
         self.confidence_threshold = confidence_threshold
         self.model = YOLO(self.model_path, verbose = False)
+        self.already_predicted = []
 
-    def detect_live(self, video_source=0):
+    def detect_live(self, cap):
         """
         Detects objects in real-time from a video source and prints the class names of detections
         where the bounding box covers 80% or more of the frame.
@@ -35,10 +36,9 @@ class ObjectDetector:
         :param video_source: The video source (default is 0 for webcam).
         """
         prediction = ""
-        already_predicted = []
+        
         new_pred = False
-        cap = cv2.VideoCapture(video_source)
-
+        
         if not cap.isOpened():
             print("Error: Unable to open video source.")
             return
@@ -69,17 +69,17 @@ class ObjectDetector:
                     percentage = 100* area_box / area
 
                     # # Draw the bounding box and label (optional)
-                    # area = box_width * box_height
-                    # label = f"{self.model.names[int(cls_id)]} ({percentage})"
-                    # cv2.rectangle(frame, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (0, 255, 0), 2)
-                    # cv2.putText(frame, label, (int(x_min), int(y_min) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                    area = box_width * box_height
+                    label = f"{self.model.names[int(cls_id)]} ({percentage})"
+                    cv2.rectangle(frame, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (0, 255, 0), 2)
+                    cv2.putText(frame, label, (int(x_min), int(y_min) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
 
                     if area_box >= 0.5 * area:
                         prediction = self.model.names[int(cls_id)]
-                        if prediction in already_predicted: new_pred = False
+                        if prediction in self.already_predicted: new_pred = False
                         else:
-                            already_predicted.append(prediction)
+                            self.already_predicted.append(prediction)
                             new_pred = True
                         
 
@@ -92,21 +92,21 @@ class ObjectDetector:
                 
 
             # Display the frame (optional)
-            # cv2.imshow('Live Detection', frame)
+            cv2.imshow('Live Detection', frame)
 
             # Break loop on 'q' key press
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-        cap.release()
-        cv2.destroyAllWindows()
+
 
 
 
 
 # Example usage:
-# detector = ObjectDetector('yolov5su.pt')
-# prediction = detector.detect_live()
+detector = ObjectDetector('yolov5su.pt')
+while True:
+    prediction = detector.detect_live()
 
 
 
