@@ -4,6 +4,8 @@ from gtts import gTTS
 from io import BytesIO
 from pydub import AudioSegment
 from pydub.playback import play
+import google.generativeai as genai
+genai.configure(api_key="AIzaSyA3TwfeFqaU_23GhnQ19V3_mrrz6K_WEK8")
 
 def hablar(texto, idioma='es'):
     """
@@ -37,6 +39,11 @@ def hablar(texto, idioma='es'):
 
     except FileNotFoundError:
         print("eSpeak no está instalado o no se encuentra en el PATH.")
+
+def generate_text(prediction):
+    model = genai.GenerativeModel("gemini-1.5-flash")
+    response = model.generate_content(f"Tell me two interesting facts for a kid about {prediction}. Start with Here a fun fact about {prediction}  and say the two facts Make it short and in spanish, do not include any punctuation as * ")
+    return response.text
 
 # Ejemplo de uso
 # hablar("Hola, ¿cómo estás?", idioma='es')

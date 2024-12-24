@@ -4,83 +4,114 @@ import numpy as np
 from pathlib import Path
 
 from ultralytics import YOLO
-import google.generativeai as genai
-import os
 
-genai.configure(api_key="AIzaSyA3TwfeFqaU_23GhnQ19V3_mrrz6K_WEK8")
+import os
+import sys
+import time
+
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(parent_dir)
+from hablar import hablar, generate_text
+
+
 
 class ObjectDetector:
-    def __init__(self, model_path='yolov5s.pt'):
-        # Load YOLOv5 model
-        self.model = torch.hub.load('ultralytics/yolov5', 'custom', path='yolov5s.pt', trust_repo=True)
+    def __init__(self, model_path, confidence_threshold=0.5):
+        """
+        Initializes the ObjectDetector instance.
+
+        :param model_path: Path to the YOLOv5 model.
+        :param confidence_threshold: Minimum confidence score to consider a detection valid.
+        """
+        self.model_path = model_path
+        self.confidence_threshold = confidence_threshold
+        self.model = YOLO(self.model_path, verbose = False)
+
+    def detect_live(self, video_source=0):
+        """
+        Detects objects in real-time from a video source and prints the class names of detections
+        where the bounding box covers 80% or more of the frame.
+
+        :param video_source: The video source (default is 0 for webcam).
+        """
+        prediction = ""
+        already_predicted = []
+        new_pred = False
+        cap = cv2.VideoCapture(video_source)
+
+        if not cap.isOpened():
+            print("Error: Unable to open video source.")
+            return
 
 
-    def detect_objects_in_image(self, image_path, output_path="output.jpg"):
-        # Load the image
-        img = cv2.imread(image_path)
-
-        # Perform detection
-        results = self.model(img)
-
-        # Draw bounding boxes and labels
-        labeled_img = self._draw_results(img, results)
-
-        # Save and return the labeled image
-        cv2.imwrite(output_path, labeled_img)
-        return labeled_img
-
-    def detect_objects_in_video(self, video_path, output_path="output_video.avi"):
-        # Load video
-        cap = cv2.VideoCapture(video_path)
-        width, height = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fourcc = cv2.VideoWriter_fourcc(*"XVID")
-        out = cv2.VideoWriter(output_path, fourcc, 20.0, (width, height))
-
-        while cap.isOpened():
+        while True:
             ret, frame = cap.read()
             if not ret:
+                print("Error: Unable to read frame from video source.")
                 break
 
-            # Perform detection on frame
-            results = self.model(frame)
+            height, width, _ = frame.shape
+            results = self.model.predict(frame)
+  
 
-            # Draw results on frame
-            labeled_frame = self._draw_results(frame, results)
-            out.write(labeled_frame)
+            for result in results:
+                for bbox, conf, cls_id in zip(result.boxes.xyxy, result.boxes.conf, result.boxes.cls):
+                    if conf < self.confidence_threshold:
+                        continue
+
+                    x_min, y_min, x_max, y_max = bbox
+                    box_width = x_max - x_min
+                    box_height = y_max - y_min
+
+                    area = width * height
+                    area_box = box_width * box_height
+
+                    percentage = 100* area_box / area
+
+                    # # Draw the bounding box and label (optional)
+                    # area = box_width * box_height
+                    # label = f"{self.model.names[int(cls_id)]} ({percentage})"
+                    # cv2.rectangle(frame, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (0, 255, 0), 2)
+                    # cv2.putText(frame, label, (int(x_min), int(y_min) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+
+                    if area_box >= 0.5 * area:
+                        prediction = self.model.names[int(cls_id)]
+                        if prediction in already_predicted: new_pred = False
+                        else:
+                            already_predicted.append(prediction)
+                            new_pred = True
+                        
+
+            if new_pred:
+                print("Detections covering 50% or more of the frame:", prediction)
+                hablar(generate_text(prediction))
+                time.sleep(5)
+                break
+                
+                
+
+            # Display the frame (optional)
+            # cv2.imshow('Live Detection', frame)
+
+            # Break loop on 'q' key press
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
         cap.release()
-        out.release()
+        cv2.destroyAllWindows()
 
-        return results
 
-    def _draw_results(self, img, results):
-        labels, coords = results.xyxyn[0][:, -1], results.xyxyn[0][:, :-1]
-        for label, coord in zip(labels, coords):
-            label = int(label)
-            x1, y1, x2, y2, conf = coord
-            if conf < 0.3:  # Confidence threshold
-                continue
 
-            # Scale coordinates
-            h, w, _ = img.shape
-            x1, y1, x2, y2 = int(x1 * w), int(y1 * h), int(x2 * w), int(y2 * h)
 
-            # Draw box and label
-            img = cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 2)
-            label_text = f"{self.model.names[label]} {conf:.2f}"
-            img = cv2.putText(img, label_text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-
-        return img
+# Example usage:
+# detector = ObjectDetector('yolov5su.pt')
+# prediction = detector.detect_live()
 
 
 
 
 
-
-def say_something(prediction):
-    model = genai.GenerativeModel("gemini-1.5-flash")
-    response = model.generate_content(f"Tell me two interesting facts about {prediction}")
-    return response.text
 
 
 

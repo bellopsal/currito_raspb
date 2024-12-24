@@ -5,6 +5,12 @@ import threading
 import time  # Missing import for time module
 from hablar import hablar
 import modes.mode_1 as mode_1
+import modes.mode_2 as mode_2
+
+##########
+detector = mode_2.ObjectDetector('yolov5su.pt')
+
+
 
 
 class MQTTReader:
@@ -16,7 +22,7 @@ class MQTTReader:
 
         self.exit_some_function = False
         self.some_function_active = False
-        self.before_mode = None
+        self.active_mode = None
 
         # Initialize the MQTT client
         self.client = mqtt.Client(client_id)
@@ -40,6 +46,7 @@ class MQTTReader:
             logger.info(f"Received message on {msg.topic}: {msg.payload.decode('utf-8')}")
             json_file = json.loads(msg.payload.decode('utf-8'))
             modo = json_file.get("Modo")
+
             if modo is None:
                 logger.warning("Missing 'Modo' in message")
                 return
@@ -47,43 +54,33 @@ class MQTTReader:
             if modo == 0:
                 # This mode is only sent when a back button is clicked.
                 logger.info("Exiting current operation...")
-                if self.before_mode != 1:
+                if self.active_mode != 1:
                     self.exit_some_function = True
+                    self.some_function_active = False
 
             elif modo == 1:
-                self.before_mode = 1
+                self.active_mode = 1
                 self.exit_some_function = False  # Reset flag
                 mode_1.send_control_message(json_file=json_file, mqtt_class=self)
 
             elif modo == 2:
-                command = json_file.get("Command")
-                if command == "Take picture":
-                    logger.info("Executing 'Take picture' command.")
-                    # Add actual logic for taking a picture here.
-                else:
-                    logger.warning("Incorrect Command")
-            else:
-                logger.warning(f"Unknown mode: {modo}")
+                self.active_mode = 1
+                self.exit_some_function = False  # Reset flag
+                if not self.some_function_active:
+                    threading.Thread(target=self.fun_fact, daemon=True).start()
+                    self.some_function_active = True
 
         except json.JSONDecodeError:
             logger.error(f"Invalid JSON message: {msg.payload}")
         except Exception as e:
             logger.error(f"Error processing message: {e}")
 
-    def wait_to_detect(self):
+    def fun_fact(self):
         self.some_function_active = True
-        try:
-            logger.info("Starting mode 2: Detect and Talk")
-            for i in range(10):  # Simulate some work
-                if self.exit_some_function:
-                    logger.info("Exiting wait_to_detect() early due to 'Modo == 0'")
-                    break
-                logger.info(f"wait_to_detect running: step {i}")
-                time.sleep(1)  # Simulate a time-consuming task
-            else:
-                logger.info("Completed wait_to_detect()")
-        finally:
-            self.some_function_active = False
+        while not self.exit_some_function:
+            detector.detect_live()
+
+###### START AND STOP MQTT            
 
     def start(self):
         threading.Thread(target=self._start_client, daemon=True).start()
