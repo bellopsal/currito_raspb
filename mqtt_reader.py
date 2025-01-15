@@ -9,8 +9,8 @@ import modes.mode_2 as mode_2
 import cv2
 
 ##########
-detector = mode_2.ObjectDetector('yolov5su.pt')
-video_source=0
+# detector = mode_2.ObjectDetector('yolov5su.pt')
+# video_source=0
 
 
 

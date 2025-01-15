@@ -4,16 +4,23 @@ import cv2
 import numpy as np
 import time
 import RPi.GPIO as GPIO
+import os
+import sys
+
+camera = cv2.VideoCapture(0)
+
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(parent_dir)
+
 from hablar import hablar
 
-descalificado_antiguo=0
+#descalificado_antiguo=0
 
-# Configuración del pin GPIO
-SERVO_PIN = 17  
-
+SERVO_PIN = 13
 # Configuración de la biblioteca RPi.GPIO
-GPIO.setmode(GPIO.BCM)
+GPIO.setmode(GPIO.BOARD)
 GPIO.setup(SERVO_PIN, GPIO.OUT)
+
 
 # Configuración de PWM
 pwm = GPIO.PWM(SERVO_PIN, 50)  # Frecuencia de 50 Hz (estándar para servos)
@@ -93,7 +100,10 @@ def process_movement(diff_threshold, frame):
 
 def main():
     # Inicializar la cámara
-    camera = cv2.VideoCapture(2)
+    camera = cv2.VideoCapture(3)
+    
+    
+    descalificado_antiguo=0
     
     if not camera.isOpened():
         print("No se pudo abrir la cámara.")
@@ -157,4 +167,4 @@ def main():
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    main()
+    main()         

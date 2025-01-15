@@ -10,7 +10,8 @@ hablar("Hola soy Currita! Espera a que me configure")
 ##      Serial Port
 ##########################################################################
 # Serial Settings
-arduino_port = '/dev/ttyACM0'  # Puede variar; intenta con /dev/ttyUSB0 si es necesario
+arduino_port = '/dev/ttyACM0'
+arduino_port ='/dev/ttyUSB0'# Puede variar; intenta con /dev/ttyUSB0 si es necesario
 baud_rate = 9600
 timeout=1
 ### test

@@ -13,6 +13,7 @@ def hablar(texto, idioma='es'):
     :param texto: Texto a pronunciar.
     :param idioma: Código del idioma (por defecto 'es' para español).
     """
+#     print("hablar"+ texto)
     try:
         tts = gTTS(texto, lang=idioma)
         
@@ -22,7 +23,7 @@ def hablar(texto, idioma='es'):
         
         audio = AudioSegment.from_mp3(audio_buffer)
         audio = audio._spawn(audio.raw_data, overrides={"frame_rate": 44100})
-        new_sample_rate = int(audio.frame_rate * (2.0 ** 0))
+        new_sample_rate = int(audio.frame_rate * (1.2 ** 0))
         audio = audio.set_frame_rate(44100)
         
         audio_buffer = BytesIO()
