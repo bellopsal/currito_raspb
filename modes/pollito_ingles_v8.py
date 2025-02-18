@@ -124,7 +124,7 @@ def main():
             print("Iniciando detección de cambios durante 3 segundos...")
             start_time = time.time()
             #while time.time() - start_time < 5:  # Detectar durante 5 segundos
-            sleep.time(2)
+            time.sleep(2)
              # Leer el cuadro actual de la cámara
             ret, frame = cap.read()
             if not ret:

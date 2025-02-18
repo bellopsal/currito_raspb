@@ -22,15 +22,15 @@ def hablar(texto, idioma='es'):
         audio_buffer.seek(0)
         
         audio = AudioSegment.from_mp3(audio_buffer)
-        audio = audio._spawn(audio.raw_data, overrides={"frame_rate": 44100})
-        new_sample_rate = int(audio.frame_rate * (1.2 ** 0))
-        audio = audio.set_frame_rate(44100)
+        audio = audio._spawn(audio.raw_data, overrides={"frame_rate": 38000})
+        #new_sample_rate = int(audio.frame_rate * (1 ** 0))
+        audio = audio.set_frame_rate(38000)
         
         audio_buffer = BytesIO()
         audio.export(audio_buffer, format="wav")
         audio_buffer.seek(0)
         
-        pygame.mixer.pre_init(frequency=44100)
+        pygame.mixer.pre_init(frequency=38000)
         pygame.mixer.init()
         pygame.mixer.music.load(audio_buffer, "wav")
         pygame.mixer.music.play()
@@ -43,7 +43,7 @@ def hablar(texto, idioma='es'):
 
 def generate_text(prediction):
     model = genai.GenerativeModel("gemini-1.5-flash")
-    response = model.generate_content(f"Tell me two interesting facts for a kid about {prediction}. Start with Here a fun fact about {prediction}  and say the two facts Make it short and in spanish, do not include any punctuation as * ")
+    response = model.generate_content(f"Tell me two interesting facts for a kid about {prediction}. Start with Here a fun fact about {prediction}  and say the two facts Make it short and in spanish, do not include any puntuation mark, just letters ")
     return response.text
 
 # Ejemplo de uso

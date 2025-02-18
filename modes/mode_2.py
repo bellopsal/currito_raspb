@@ -103,11 +103,12 @@ class ObjectDetector:
 
 
 
-# 
-# detector = ObjectDetector('yolov5su.pt')
-# cap = cv2.VideoCapture(0)
-# while True:
-#     prediction = detector.detect_live(cap)
+if __name__ == "__main__":
+    
+    detector = ObjectDetector('yolov5su.pt')
+    cap = cv2.VideoCapture(0)
+    while True:
+        prediction = detector.detect_live(cap)
 
 
 

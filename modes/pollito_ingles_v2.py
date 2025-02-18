@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
 import time
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
+import lgpio
 import os
 import sys
 #from hablar import hablar
@@ -13,21 +14,28 @@ from hablar import hablar
 #descalificado_antiguo=0
 
 # Configuración del pin GPIO
-#SERVO_PIN = 17  
+SERVO_PIN = 18
+PWM_FREQ = 50
+CHIP = 0
 
 # Configuración de la biblioteca RPi.GPIO
-#GPIO.setmode(GPIO.BCM)
-#GPIO.setup(SERVO_PIN, GPIO.OUT)
+# GPIO.setmode(GPIO.BCM)
+# GPIO.setup(SERVO_PIN, GPIO.OUT)
+
 
 # Configuración de PWM
-#pwm = GPIO.PWM(SERVO_PIN, 50)  # Frecuencia de 50 Hz (estándar para servos)
-#pwm.start(0)  # Iniciar PWM con un duty cycle de 0%
+# pwm = GPIO.PWM(SERVO_PIN, 50)  # Frecuencia de 50 Hz (estándar para servos)
+# pwm.start(0)  # Iniciar PWM con un duty cycle de 0%
+h = lgpio.gpiochip_open(CHIP)
+lgpio.gpio_claim_output(h, SERVO_PIN)
+lgpio.tx_pwm(h, SERVO_PIN, PWM_FREQ, 50)
 
-#def mover_servo(angulo):
+def mover_servo(angulo):
 #    """Convierte un ángulo (0° a 180°) a ciclo de trabajo para el servo."""
- #   duty_cycle = 2.5 + (angulo / 180.0) * 10.0  # Mapear ángulo a duty cycle
-  #  pwm.ChangeDutyCycle(duty_cycle)
-   # time.sleep(0.5)  # Esperar para que el servo se mueva a la posición
+    duty_cycle = 2.5 + (angulo / 180.0) * 10.0  # Mapear ángulo a duty cycle
+    #pwm.ChangeDutyCycle(duty_cycle)
+    lgpio.tx_pwm(h, SERVO_PIN, PWM_FREQ, duty_cycle)
+    time.sleep(0.5)  # Esperar para que el servo se mueva a la posición
 
 def capture_background(cap):
     print("Capturando el fondo")
@@ -109,13 +117,13 @@ def main():
         while True:
             #posicion inicial (mirando a la pared)
             print("Moviendo servo a 0°...")
-            #mover_servo(0)
-            hablar ("Un, dos, tres pollito inglés a la pared")
+            mover_servo(0)
+            hablar("Un, dos, tres pollito inglés a la pared")
             time.sleep(3)  # Esperar 3 segundo
 
             #posicion vigilancia
             print("Moviendo servo a 180°...")
-            #mover_servo(180)
+            mover_servo(180)
             time.sleep(1)
 
             # Capturar el fondo cuando currito este en la posicion
@@ -151,7 +159,7 @@ def main():
                 
                     
                 # Mostrar la imagen con movimiento detectado
-                cv2.imshow("Movimiento Detectado", frame)
+                #cv2.imshow("Movimiento Detectado", frame)
                 
                 # Presionar 'q' para salir anticipadamente
                 if cv2.waitKey(1) & 0xFF == ord('q'):
