@@ -6,6 +6,7 @@ import time  # Missing import for time module
 from hablar import hablar
 import modes.mode_1 as mode_1
 import modes.mode_2 as mode_2
+import modes.mode_3 as mode_3
 import cv2
 
 ##########
@@ -72,6 +73,13 @@ class MQTTReader:
                     threading.Thread(target=self.fun_fact, daemon=True).start()
                     self.some_function_active = True
 
+            elif modo == 3:
+                self.active_mode = 1
+                self.exit_some_function = False  # Reset flag
+                if not self.some_function_active:
+                    threading.Thread(target=self.pollito_ingles, daemon=True).start()
+                    self.some_function_active = True
+
         except json.JSONDecodeError:
             logger.error(f"Invalid JSON message: {msg.payload}")
         except Exception as e:
@@ -79,11 +87,30 @@ class MQTTReader:
 
     def fun_fact(self):
         self.some_function_active = True
-        cap = cv2.VideoCapture(video_source)
+        cap = cv2.VideoCapture(0)
+        detector = mode_2.ObjectDetector('yolov5su.pt')
+        
         while not self.exit_some_function:
             detector.detect_live(cap)
+
         cap.release()
         cv2.destroyAllWindows()
+    
+    def pollito_ingles(self):
+        self.some_function_active = True
+        cap = cv2.VideoCapture(0)
+        
+        descalificado_antiguo=0
+        time.sleep(2)
+        if not cap.isOpened():
+            print("No se pudo abrir la cámara.")
+            return
+        while not self.exit_some_function:
+            mode_3.main()
+
+        cap.release()
+        cv2.destroyAllWindows()
+        
 
 ###### START AND STOP MQTT            
 

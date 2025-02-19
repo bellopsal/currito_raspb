@@ -1,14 +1,11 @@
-### Pollito inglés
-
 import cv2
 import numpy as np
 import time
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
+import lgpio
 import os
 import sys
-
-camera = cv2.VideoCapture(0)
-
+#from hablar import hablar
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(parent_dir)
 
@@ -16,26 +13,34 @@ from hablar import hablar
 
 #descalificado_antiguo=0
 
-SERVO_PIN = 13
+# Configuración del pin GPIO
+SERVO_PIN = 18
+PWM_FREQ = 50
+CHIP = 0
+
 # Configuración de la biblioteca RPi.GPIO
-GPIO.setmode(GPIO.BOARD)
-GPIO.setup(SERVO_PIN, GPIO.OUT)
+# GPIO.setmode(GPIO.BCM)
+# GPIO.setup(SERVO_PIN, GPIO.OUT)
 
 
 # Configuración de PWM
-pwm = GPIO.PWM(SERVO_PIN, 50)  # Frecuencia de 50 Hz (estándar para servos)
-pwm.start(0)  # Iniciar PWM con un duty cycle de 0%
+# pwm = GPIO.PWM(SERVO_PIN, 50)  # Frecuencia de 50 Hz (estándar para servos)
+# pwm.start(0)  # Iniciar PWM con un duty cycle de 0%
+h = lgpio.gpiochip_open(CHIP)
+lgpio.gpio_claim_output(h, SERVO_PIN)
+lgpio.tx_pwm(h, SERVO_PIN, PWM_FREQ, 50)
 
 def mover_servo(angulo):
-    """Convierte un ángulo (0° a 180°) a ciclo de trabajo para el servo."""
+#    """Convierte un ángulo (0° a 180°) a ciclo de trabajo para el servo."""
     duty_cycle = 2.5 + (angulo / 180.0) * 10.0  # Mapear ángulo a duty cycle
-    pwm.ChangeDutyCycle(duty_cycle)
+    #pwm.ChangeDutyCycle(duty_cycle)
+    lgpio.tx_pwm(h, SERVO_PIN, PWM_FREQ, duty_cycle)
     time.sleep(0.5)  # Esperar para que el servo se mueva a la posición
 
-def capture_background(camera):
+def capture_background(cap):
     print("Capturando el fondo")
     #time.sleep(1)  # Esperar 1 segundo
-    ret, background = camera.read()
+    ret, background = cap.read()
     if ret:
         print("Imagen de fondo capturada.")
         cv2.imshow("Fondo Capturado", background)  # Mostrar la imagen del fondo
@@ -98,73 +103,58 @@ def process_movement(diff_threshold, frame):
     return descalificado
       
 
-def main():
-    # Inicializar la cámara
-    camera = cv2.VideoCapture(3)
-    
-    
-    descalificado_antiguo=0
-    
-    if not camera.isOpened():
-        print("No se pudo abrir la cámara.")
-        return
+def main(cap):
+        #posicion inicial (mirando a la pared)
+        print("Moviendo servo a 0°...")
+        mover_servo(0)
+        hablar("Un, dos, tres pollito inglés a la pared")
+        time.sleep(3)  # Esperar 3 segundo
 
-    try:
-        while True:
-            #posicion inicial (mirando a la pared)
-            print("Moviendo servo a 0°...")
-            mover_servo(0)
-            hablar ("Un, dos, tres pollito inglés a la pared")
-            time.sleep(3)  # Esperar 3 segundo
+        #posicion vigilancia
+        print("Moviendo servo a 180°...")
+        mover_servo(180)
+        time.sleep(1)
 
-            #posicion vigilancia
-            print("Moviendo servo a 180°...")
-            mover_servo(180)
-            time.sleep(1)
+        # Capturar el fondo cuando currito este en la posicion
+        background = capture_background(cap)
 
-            # Capturar el fondo cuando currito este en la posicion
-            background = capture_background(camera)
+        print("Iniciando detección de cambios durante 3 segundos...")
+        start_time = time.time()
+        while time.time() - start_time < 5:  # Detectar durante 5 segundos
+            # Leer el cuadro actual de la cámara
+            ret, frame = cap.read()
+            if not ret:
+                print("No se pudo leer el cuadro de la cámara.")
+                break
 
-            print("Iniciando detección de cambios durante 3 segundos...")
-            start_time = time.time()
-            while time.time() - start_time < 5:  # Detectar durante 5 segundos
-                # Leer el cuadro actual de la cámara
-                ret, frame = camera.read()
-                if not ret:
-                    print("No se pudo leer el cuadro de la cámara.")
-                    break
+            # Detectar cambios
+            diff_threshold = detect_changes(background, frame)
 
-                # Detectar cambios
-                diff_threshold = detect_changes(background, frame)
-
-                # Procesar movimiento en las áreas
-                jugador_descalificado= process_movement(diff_threshold, frame)
-                if  jugador_descalificado!= descalificado_antiguo:
-                    descalificado_antiguo=jugador_descalificado
-                    if jugador_descalificado==1 :
-                        print("Descalificados jugador 1")
-                        hablar("Descalificado el jugador 1")
-                    else : 
-                        if jugador_descalificado==2 :
-                            print("Descalificados jugador 2")
-                            hablar("Descalificado el jugador 2")
-                        else: 
-                            if jugador_descalificado==3 :
-                                print("Descalificados los dos")
-                                hablar("Descalificados los dos")
-                    
-                    
-                # Mostrar la imagen con movimiento detectado
-                cv2.imshow("Movimiento Detectado", frame)
+            # Procesar movimiento en las áreas
+            jugador_descalificado= process_movement(diff_threshold, frame)
+            if  jugador_descalificado!= descalificado_antiguo:
+                descalificado_antiguo=jugador_descalificado
+                if jugador_descalificado==1 :
+                    print("Descalificados jugador 1")
+                    hablar("Descalificado el jugador 1")
+                else : 
+                    if jugador_descalificado==2 :
+                        print("Descalificados jugador 2")
+                        hablar("Descalificado el jugador 2")
+                    else: 
+                        if jugador_descalificado==3 :
+                            print("Descalificados los dos")
+                            hablar("Descalificados los dos")
+            
                 
-                # Presionar 'q' para salir anticipadamente
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    return
+            # Mostrar la imagen con movimiento detectado
+            #cv2.imshow("Movimiento Detectado", frame)
+            
+            # Presionar 'q' para salir anticipadamente
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                return
 
-    finally:
-        # Liberar la cámara y cerrar las ventanas
-        camera.release()
-        cv2.destroyAllWindows()
+       
 
 if __name__ == "__main__":
-    main()         
+    main()
