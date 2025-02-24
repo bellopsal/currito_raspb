@@ -18,3 +18,28 @@ para asegurarse de que el servidor está levantado puede realizar el siguiente c
 ```
 systemctl status mosquitto.service
 ```
+
+## Configuración del Python
+```
+chmod +x configure_python.sh
+./configure_python.sh
+```
+
+## Configuración de la app
+Conecte la Raspberry al WIFI que vaya a usar generalmente y obtenga la IP. Esa IP debe ser introducida en la App y generar la APK con esa configuración.
+Posible mejora: la app solicite en la primera pantalla la IP de la Raspberry Pi para configurar la dirección del servidor MQTT.
+
+# Uso
+Para su correcto funcionamiento, se debe conectar lo siguiente:
+- Raspberry Pi y Arduino Uno por puerto serie.
+- Conectar Web Cam por USB
+- Conectar Altavoz (Bluetooth o USB es indiferente)
+- La señal del servo de la cabeza al PIN 18.
+
+Una vez todo conectado. Solo debe lanzar el main.py (en el environment currito) de la forma que prefiera. Desde la terminal sería
+```
+source /home/pi/currito/bin/activate
+python /home/pi/currito_raspb/main.py
+```
+Ya puede hacer uso de la aplicación para jugar con su currito :)
+
