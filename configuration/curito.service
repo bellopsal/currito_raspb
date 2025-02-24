@@ -1,0 +1,14 @@
+[Unit] 
+Description=Currito Service
+After=multi-user.target 
+
+[Service] 
+Type=simple 
+ExecStart=/home/pi/currito_raspb/main.py
+WorkingDirectory=/home/pi 
+Restart=always 
+User=pi
+Environment="PATH=/home/pi/currito/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" 
+
+[Install] 
+WantedBy=multi-user.target

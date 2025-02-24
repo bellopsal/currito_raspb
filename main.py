@@ -29,10 +29,6 @@ TOPIC = "currito"
 
 mqtt_reader = MQTTReader(broker=BROKER, port=PORT, topic=TOPIC, serial = arduino_serial)
 
-
-
-
-
 ###########################
 ############################
 
