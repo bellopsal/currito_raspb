@@ -69,10 +69,10 @@ class ObjectDetector:
                     percentage = 100* area_box / area
 
 #                     # # Draw the bounding box and label (optional)
-#                     area = box_width * box_height
-#                     label = f"{self.model.names[int(cls_id)]} ({percentage})"
-#                     cv2.rectangle(frame, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (0, 255, 0), 2)
-#                     cv2.putText(frame, label, (int(x_min), int(y_min) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                    #area = box_width * box_height
+                    #label = f"{self.model.names[int(cls_id)]} ({percentage})"
+                    #cv2.rectangle(frame, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (0, 255, 0), 2)
+                    #cv2.putText(frame, label, (int(x_min), int(y_min) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
 
                     if area_box >= 0.5 * area:

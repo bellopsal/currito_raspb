@@ -22,7 +22,8 @@ class MQTTReader:
         self.port = port
         self.topic = topic
         self.serial = serial
-
+        
+        self.cap = cv2.VideoCapture(0)
         self.exit_some_function = False
         self.some_function_active = False
         self.active_mode = None
@@ -49,6 +50,7 @@ class MQTTReader:
             logger.info(f"Received message on {msg.topic}: {msg.payload.decode('utf-8')}")
             json_file = json.loads(msg.payload.decode('utf-8'))
             modo = json_file.get("Modo")
+            logger.info(modo)
 
             if modo is None:
                 logger.warning("Missing 'Modo' in message")
@@ -57,9 +59,9 @@ class MQTTReader:
             if modo == 0:
                 # This mode is only sent when a back button is clicked.
                 logger.info("Exiting current operation...")
-                if self.active_mode != 1:
-                    self.exit_some_function = True
-                    self.some_function_active = False
+                #mode_1.send_end(mqtt_class=self)
+                self.exit_some_function = True
+                self.some_function_active = False
 
             elif modo == 1:
                 self.active_mode = 1
@@ -78,6 +80,7 @@ class MQTTReader:
                 self.exit_some_function = False  # Reset flag
                 if not self.some_function_active:
                     threading.Thread(target=self.pollito_ingles, daemon=True).start()
+                    time.sleep(7)
                     self.some_function_active = True
 
         except json.JSONDecodeError:
@@ -86,30 +89,31 @@ class MQTTReader:
             logger.error(f"Error processing message: {e}")
 
     def fun_fact(self):
-        self.some_function_active = True
-        cap = cv2.VideoCapture(0)
+        #self.cap = cv2.VideoCapture(0)
         detector = mode_2.ObjectDetector('yolov5su.pt')
         
         while not self.exit_some_function:
-            detector.detect_live(cap)
+            detector.detect_live(self.cap)
+            time.sleep(5)
 
-        cap.release()
-        cv2.destroyAllWindows()
+        #self.cap.release()
+        #cv2.destroyAllWindows()
+        
     
     def pollito_ingles(self):
-        self.some_function_active = True
-        cap = cv2.VideoCapture(0)
         
+        #self.cap = cv2.VideoCapture(0)
         descalificado_antiguo=0
         time.sleep(2)
-        if not cap.isOpened():
+        if not self.cap.isOpened():
             print("No se pudo abrir la cámara.")
             return
         while not self.exit_some_function:
-            mode_3.main()
+            mode_3.main(self.cap)
 
-        cap.release()
-        cv2.destroyAllWindows()
+        #self.cap.release()
+        #cv2.destroyAllWindows()
+        
         
 
 ###### START AND STOP MQTT            
@@ -134,4 +138,5 @@ class MQTTReader:
 
 
 
+    
 

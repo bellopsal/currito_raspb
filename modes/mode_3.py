@@ -43,8 +43,8 @@ def capture_background(cap):
     ret, background = cap.read()
     if ret:
         print("Imagen de fondo capturada.")
-        cv2.imshow("Fondo Capturado", background)  # Mostrar la imagen del fondo
-        cv2.waitKey(500)  # Esperar 500 ms para que se pueda ver
+        #cv2.imshow("Fondo Capturado", background)  # Mostrar la imagen del fondo
+        #cv2.waitKey(500)  # Esperar 500 ms para que se pueda ver
         return background
     else:
         raise RuntimeError("No se pudo capturar la imagen de fondo.")
@@ -93,22 +93,29 @@ def process_movement(diff_threshold, frame):
     if movement_area1 > 0 and movement_area2 > 0:
         #print("Descalificados los dos")
         descalificado= 3
+        return descalificado
+        
     elif movement_area1 > 0:
         #print("Descalificado persona 1")
         descalificado= 1
+        return descalificado
+        
     elif movement_area2 > 0:
         #print("Descalificado persona 2")
         descalificado= 2
+        return descalificado
+        
 
-    return descalificado
+    #return descalificado
       
 
 def main(cap):
+        descalificado_antiguo=0
         #posicion inicial (mirando a la pared)
         print("Moviendo servo a 0°...")
         mover_servo(0)
         hablar("Un, dos, tres pollito inglés a la pared")
-        time.sleep(3)  # Esperar 3 segundo
+        time.sleep(1)  # Esperar 3 segundo
 
         #posicion vigilancia
         print("Moviendo servo a 180°...")
@@ -120,7 +127,7 @@ def main(cap):
 
         print("Iniciando detección de cambios durante 3 segundos...")
         start_time = time.time()
-        while time.time() - start_time < 5:  # Detectar durante 5 segundos
+        while time.time() - start_time < 2:  # Detectar durante 5 segundos
             # Leer el cuadro actual de la cámara
             ret, frame = cap.read()
             if not ret:
@@ -148,7 +155,7 @@ def main(cap):
             
                 
             # Mostrar la imagen con movimiento detectado
-            #cv2.imshow("Movimiento Detectado", frame)
+            cv2.imshow("Movimiento Detectado", frame)
             
             # Presionar 'q' para salir anticipadamente
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -157,4 +164,7 @@ def main(cap):
        
 
 if __name__ == "__main__":
-    main()
+    cap = cv2.VideoCapture(0)
+    while True:
+        main(cap)
+        time.sleep(7)

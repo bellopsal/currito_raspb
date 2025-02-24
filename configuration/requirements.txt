@@ -2,10 +2,11 @@ pyserial
 pygame
 gTTS
 pydub
-paho-mqtt
+paho-mqtt=1.6.1
 loguru
 torch
 opencv-python
 numpy
 ultralytics
 google-generativeai
+RPi.GPIO
